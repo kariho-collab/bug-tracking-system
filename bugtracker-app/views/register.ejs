@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Register — Bug Tracker</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <h1>Create Account</h1>
+      <% if (error) { %><div class="error-box"><%= error %></div><% } %>
+      <form method="POST" action="/register">
+        <label>Full name</label>
+        <input type="text" name="name" required />
+        <label>Email address</label>
+        <input type="email" name="email" required />
+        <label>Password</label>
+        <input type="password" name="password" required />
+        <button class="btn" style="width:100%;" type="submit">REGISTER</button>
+      </form>
+      <a class="muted-link" href="/login">Already have an account? Log in</a>
+    </div>
+  </div>
+</body>
+</html>

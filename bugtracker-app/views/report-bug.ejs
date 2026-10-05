@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Report a Bug — Bug Tracker</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <%- include('partials/navbar', { user, active: 'report-bug' }) %>
+  <div class="container narrow">
+    <h1>Report a New Bug</h1>
+    <% if (duplicateOf) { %>
+      <div class="info-box">
+        A matching open bug already exists: <a class="rowlink" href="/bugs/<%= duplicateOf.bug_id %>">#<%= duplicateOf.bug_id %> — <%= duplicateOf.title %></a> (<%= duplicateOf.status %>). Your report was linked to it instead of creating a duplicate.
+      </div>
+    <% } %>
+    <div class="card">
+      <form method="POST" action="/report-bug">
+        <label>Title</label>
+        <input type="text" name="title" placeholder="e.g. App crashes on login" required />
+        <label>Description</label>
+        <textarea name="description" placeholder="Steps to reproduce, expected vs actual behavior..." required></textarea>
+        <label>Category</label>
+        <select name="category_id" required>
+          <% categories.forEach(c => { %><option value="<%= c.category_id %>"><%= c.name %></option><% }) %>
+        </select>
+        <label>Priority</label>
+        <select name="priority" required>
+          <option>Low</option><option>Medium</option><option selected>High</option><option>Critical</option>
+        </select>
+        <button class="btn" type="submit">SUBMIT BUG</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

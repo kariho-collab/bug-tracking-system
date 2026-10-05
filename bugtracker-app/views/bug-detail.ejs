@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Bug #<%= bug.bug_id %> — Bug Tracker</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <%- include('partials/navbar', { user, active: 'bugs' }) %>
+  <div class="container">
+    <h1>Bug #<%= bug.bug_id %>: <%= bug.title %></h1>
+    <div>
+      <span class="badge <%= bug.priority %>"><%= bug.priority %></span>
+      <span class="badge <%= bug.status.replace(' ', '-') %>"><%= bug.status %></span>
+      <span class="badge" style="background:#e9ecef;color:#495057;"><%= bug.category %></span>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <h2>Description</h2>
+      <p style="font-size:13px; color:#444;"><%= bug.description %></p>
+      <p style="font-size:12px; color:#888;">
+        Reported by <%= bug.reported_by_name %> on <%= bug.date_reported.slice(0,10) %>
+        &nbsp;·&nbsp; Assigned to <%= bug.assigned_to_name || 'unassigned' %>
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Update Status</h2>
+      <form method="POST" action="/bugs/<%= bug.bug_id %>/status" style="display:flex; gap:10px; align-items:flex-end;">
+        <div style="flex:1;">
+          <select name="status">
+            <% ['Open','In Progress','Resolved','Closed','Reopened'].forEach(s => { %>
+              <option <%= bug.status === s ? 'selected' : '' %>><%= s %></option>
+            <% }) %>
+          </select>
+        </div>
+        <button class="btn small" style="margin-top:0;" type="submit">UPDATE</button>
+      </form>
+
+      <h2 style="margin-top:18px;">Assign To</h2>
+      <form method="POST" action="/bugs/<%= bug.bug_id %>/assign" style="display:flex; gap:10px; align-items:flex-end;">
+        <div style="flex:1;">
+          <select name="assigned_to">
+            <option value="">— Unassigned —</option>
+            <% developers.forEach(d => { %>
+              <option value="<%= d.user_id %>" <%= bug.assigned_to === d.user_id ? 'selected' : '' %>><%= d.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <button class="btn small gray" style="margin-top:0;" type="submit">ASSIGN</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Activity &amp; Comments</h2>
+      <% comments.forEach(c => { %>
+        <div class="comment">
+          <%= c.comment_text %>
+          <div class="meta"><%= c.author %> · <%= c.timestamp %></div>
+        </div>
+      <% }) %>
+      <% if (comments.length === 0) { %><p style="font-size:13px; color:#888;">No activity yet.</p><% } %>
+      <form method="POST" action="/bugs/<%= bug.bug_id %>/comment" style="margin-top:14px;">
+        <textarea name="comment_text" placeholder="Add a comment..." required></textarea>
+        <button class="btn small" type="submit">ADD COMMENT</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

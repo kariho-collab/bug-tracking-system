@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Reports — Bug Tracker</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <%- include('partials/navbar', { user, active: 'reports' }) %>
+  <div class="container">
+    <h1>Bug Reports &amp; Analytics</h1>
+
+    <div class="card">
+      <h2>Bugs by Category</h2>
+      <div class="chart-bars">
+        <% const maxCount = Math.max(...byCategory.map(c => c.count), 1); %>
+        <% byCategory.forEach(c => { %>
+          <div class="bar-wrap">
+            <div class="bar" style="height:<%= Math.round((c.count / maxCount) * 130) %>px; width: 44px;"></div>
+            <div class="bar-label"><%= c.category %> (<%= c.count %>)</div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Status Breakdown</h2>
+      <table>
+        <tr><th>Status</th><th>Count</th></tr>
+        <% byStatus.forEach(s => { %>
+          <tr><td><span class="badge <%= s.status.replace(' ','-') %>"><%= s.status %></span></td><td><%= s.count %></td></tr>
+        <% }) %>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Summary</h2>
+      <p style="font-size:13px; color:#444;">
+        Total bugs logged: <strong><%= totalBugs %></strong>
+        &nbsp;·&nbsp; Average time to resolve: <strong><%= avgResolutionDays !== null ? avgResolutionDays + ' days' : 'n/a' %></strong>
+        &nbsp;·&nbsp; Reopened rate: <strong><%= reopenedRate %>%</strong>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

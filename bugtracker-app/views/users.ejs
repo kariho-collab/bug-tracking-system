@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Manage Users — Bug Tracker</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <%- include('partials/navbar', { user, active: 'users' }) %>
+  <div class="container">
+    <h1>Manage Users</h1>
+
+    <div class="card">
+      <h2>Add User</h2>
+      <form method="POST" action="/users" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+        <div style="flex:1; min-width:140px;"><label>Name</label><input type="text" name="name" required /></div>
+        <div style="flex:1; min-width:160px;"><label>Email</label><input type="email" name="email" required /></div>
+        <div style="flex:1; min-width:140px;"><label>Password</label><input type="password" name="password" required /></div>
+        <div style="min-width:130px;"><label>Role</label>
+          <select name="role"><option value="developer">developer</option><option value="administrator">administrator</option></select>
+        </div>
+        <button class="btn small" style="margin-top:0;" type="submit">ADD USER</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <table>
+        <tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr>
+        <% users.forEach(u => { %>
+          <tr>
+            <td><%= u.name %></td>
+            <td><%= u.email %></td>
+            <td>
+              <form method="POST" action="/users/<%= u.user_id %>/role" style="display:inline-flex; gap:6px;">
+                <select name="role" onchange="this.form.submit()">
+                  <option value="developer" <%= u.role === 'developer' ? 'selected' : '' %>>developer</option>
+                  <option value="administrator" <%= u.role === 'administrator' ? 'selected' : '' %>>administrator</option>
+                </select>
+              </form>
+            </td>
+            <td>
+              <% if (u.user_id !== user.user_id) { %>
+              <form method="POST" action="/users/<%= u.user_id %>/delete" style="display:inline;">
+                <button class="btn small danger" type="submit">Remove</button>
+              </form>
+              <% } else { %>
+                <span style="color:#888; font-size:12px;">(you)</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<div class="navbar">
+  <a href="/dashboard" class="<%= active === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+  <a href="/report-bug" class="<%= active === 'report-bug' ? 'active' : '' %>">Report Bug</a>
+  <a href="/bugs" class="<%= active === 'bugs' ? 'active' : '' %>">Bug Tracker</a>
+  <a href="/reports" class="<%= active === 'reports' ? 'active' : '' %>">Reports</a>
+  <% if (user && user.role === 'administrator') { %>
+    <a href="/users" class="<%= active === 'users' ? 'active' : '' %>">Users</a>
+  <% } %>
+  <div class="spacer"></div>
+  <span class="user"><%= user ? user.name : '' %></span>
+  <a href="/logout" style="margin-left:16px;">Logout</a>
+</div>

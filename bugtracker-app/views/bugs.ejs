@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Bug Tracker</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <%- include('partials/navbar', { user, active: 'bugs' }) %>
+  <div class="container">
+    <h1>Bug Tracker</h1>
+    <form method="GET" action="/bugs" class="filters">
+      <select name="status" onchange="this.form.submit()">
+        <option value="">Status: All</option>
+        <% ['Open','In Progress','Resolved','Closed','Reopened'].forEach(s => { %>
+          <option value="<%= s %>" <%= query.status === s ? 'selected' : '' %>><%= s %></option>
+        <% }) %>
+      </select>
+      <select name="priority" onchange="this.form.submit()">
+        <option value="">Priority: All</option>
+        <% ['Low','Medium','High','Critical'].forEach(p => { %>
+          <option value="<%= p %>" <%= query.priority === p ? 'selected' : '' %>><%= p %></option>
+        <% }) %>
+      </select>
+      <select name="category" onchange="this.form.submit()">
+        <option value="">Category: All</option>
+        <% categories.forEach(c => { %>
+          <option value="<%= c.name %>" <%= query.category === c.name ? 'selected' : '' %>><%= c.name %></option>
+        <% }) %>
+      </select>
+    </form>
+
+    <div class="card">
+      <table>
+        <tr><th>ID</th><th>Title</th><th>Category</th><th>Priority</th><th>Status</th><th>Assigned</th><th>Date</th></tr>
+        <% bugs.forEach(b => { %>
+          <tr>
+            <td><a class="rowlink" href="/bugs/<%= b.bug_id %>">#<%= b.bug_id %></a></td>
+            <td><%= b.title %></td>
+            <td><%= b.category %></td>
+            <td><span class="badge <%= b.priority %>"><%= b.priority %></span></td>
+            <td><span class="badge <%= b.status.replace(' ', '-') %>"><%= b.status %></span></td>
+            <td><%= b.assigned_to || '—' %></td>
+            <td><%= b.date_reported.slice(0, 10) %></td>
+          </tr>
+        <% }) %>
+        <% if (bugs.length === 0) { %>
+          <tr><td colspan="7" style="text-align:center; color:#888; padding:24px;">No bugs match these filters.</td></tr>
+        <% } %>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
