@@ -1,37 +1,64 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Dashboard — Bug Tracker</title>
-  <link rel="stylesheet" href="/style.css" />
-</head>
-<body>
-  <%- include('partials/navbar', { user, active: 'dashboard' }) %>
-  <div class="container">
-    <h1>Dashboard</h1>
-    <div class="stats-row">
-      <div class="stat red"><div class="num"><%= counts.open %></div><div class="label">OPEN BUGS</div></div>
-      <div class="stat orange"><div class="num"><%= counts.inProgress %></div><div class="label">IN PROGRESS</div></div>
-      <div class="stat green"><div class="num"><%= counts.resolved %></div><div class="label">RESOLVED</div></div>
-      <div class="stat purple"><div class="num"><%= counts.critical %></div><div class="label">CRITICAL</div></div>
-    </div>
+<%- include('partials/shell-start', { user: user, active: 'dashboard', title: 'Dashboard — BugTracker' }) %>
+<% const pct = (n) => total ? Math.round((n / total) * 100) : 0; %>
+        <header class="page-head" style="--i:0">
+          <div>
+            <h1>Dashboard</h1>
+            <p>What needs attention across your project right now.</p>
+          </div>
+          <a class="btn" href="/report-bug">Report a bug</a>
+        </header>
 
-    <div class="card">
-      <h2>Recent Bug Reports</h2>
-      <table>
-        <tr><th>ID</th><th>Title</th><th>Category</th><th>Priority</th><th>Status</th><th>Assigned</th></tr>
-        <% recentBugs.forEach(b => { %>
-          <tr>
-            <td><a class="rowlink" href="/bugs/<%= b.bug_id %>">#<%= b.bug_id %></a></td>
-            <td><%= b.title %></td>
-            <td><%= b.category %></td>
-            <td><span class="badge <%= b.priority %>"><%= b.priority %></span></td>
-            <td><span class="badge <%= b.status.replace(' ', '-') %>"><%= b.status %></span></td>
-            <td><%= b.assigned_to || '—' %></td>
-          </tr>
-        <% }) %>
-      </table>
-    </div>
-  </div>
-</body>
-</html>
+        <section class="stats enter" style="--i:1" data-inview aria-label="Bug totals">
+          <a class="card card-lift stat c-open" href="/bugs?status=Open">
+            <div class="stat-top"><span>Open</span><span class="stat-dot" aria-hidden="true"></span></div>
+            <div class="stat-value" data-count="<%= counts.open %>"><%= counts.open %></div>
+            <div class="meter" aria-hidden="true"><i style="--p: <%= pct(counts.open) %>%"></i></div>
+            <p class="stat-note"><%= pct(counts.open) %>% of <%= total %> bugs</p>
+          </a>
+          <a class="card card-lift stat c-progress" href="/bugs?status=In%20Progress">
+            <div class="stat-top"><span>In progress</span><span class="stat-dot" aria-hidden="true"></span></div>
+            <div class="stat-value" data-count="<%= counts.inProgress %>"><%= counts.inProgress %></div>
+            <div class="meter" aria-hidden="true"><i style="--p: <%= pct(counts.inProgress) %>%"></i></div>
+            <p class="stat-note"><%= pct(counts.inProgress) %>% of <%= total %> bugs</p>
+          </a>
+          <div class="card stat c-resolved">
+            <div class="stat-top"><span>Resolved or closed</span><span class="stat-dot" aria-hidden="true"></span></div>
+            <div class="stat-value" data-count="<%= counts.resolved %>"><%= counts.resolved %></div>
+            <div class="meter" aria-hidden="true"><i style="--p: <%= pct(counts.resolved) %>%"></i></div>
+            <p class="stat-note"><%= pct(counts.resolved) %>% of <%= total %> bugs</p>
+          </div>
+          <a class="card card-lift stat c-critical <%= counts.critical > 0 ? 'glow-border' : '' %>" href="/bugs?priority=Critical">
+            <div class="stat-top"><span>Critical</span><span class="stat-dot" aria-hidden="true"></span></div>
+            <div class="stat-value" data-count="<%= counts.critical %>"><%= counts.critical %></div>
+            <div class="meter" aria-hidden="true"><i style="--p: <%= pct(counts.critical) %>%"></i></div>
+            <p class="stat-note"><%= pct(counts.critical) %>% of <%= total %> bugs</p>
+          </a>
+        </section>
+
+        <section class="card card-flush enter" style="--i:2" aria-labelledby="recentTitle">
+          <div class="card-pad">
+            <h2 class="card-title" id="recentTitle">Recent bugs</h2>
+            <p class="card-sub">The five most recently reported.</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Title</th><th class="hide-sm">Category</th><th>Priority</th><th>Status</th><th class="hide-sm">Assigned to</th></tr></thead>
+              <tbody>
+                <% recentBugs.forEach(b => { %>
+                <tr data-href="/bugs/<%= b.bug_id %>">
+                  <td><a class="row-link" href="/bugs/<%= b.bug_id %>">#<%= b.bug_id %></a></td>
+                  <td class="cell-title"><%= b.title %></td>
+                  <td class="cell-muted hide-sm"><%= b.category %></td>
+                  <td><span class="badge <%= b.priority %>"><%= b.priority %></span></td>
+                  <td><span class="badge <%= b.status.replace(' ', '-') %>"><%= b.status %></span></td>
+                  <td class="cell-muted hide-sm"><%= b.assigned_to || 'Unassigned' %></td>
+                </tr>
+                <% }) %>
+                <% if (recentBugs.length === 0) { %>
+                <tr><td colspan="6"><div class="empty"><strong>No bugs yet</strong>Report the first one to start tracking.</div></td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+<%- include('partials/shell-end') %>

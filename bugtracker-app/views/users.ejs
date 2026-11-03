@@ -1,56 +1,73 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Manage Users — Bug Tracker</title>
-  <link rel="stylesheet" href="/style.css" />
-</head>
-<body>
-  <%- include('partials/navbar', { user, active: 'users' }) %>
-  <div class="container">
-    <h1>Manage Users</h1>
+<%- include('partials/shell-start', { user: user, active: 'users', title: 'Users — BugTracker' }) %>
+        <header class="page-head" style="--i:0">
+          <div>
+            <h1>Users</h1>
+            <p>Add people, change what they can do, or remove their access. Only administrators see this page.</p>
+          </div>
+        </header>
 
-    <div class="card">
-      <h2>Add User</h2>
-      <form method="POST" action="/users" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
-        <div style="flex:1; min-width:140px;"><label>Name</label><input type="text" name="name" required /></div>
-        <div style="flex:1; min-width:160px;"><label>Email</label><input type="email" name="email" required /></div>
-        <div style="flex:1; min-width:140px;"><label>Password</label><input type="password" name="password" required /></div>
-        <div style="min-width:130px;"><label>Role</label>
-          <select name="role"><option value="developer">developer</option><option value="administrator">administrator</option></select>
+        <div class="stack-cards">
+          <section class="card collapsible is-open enter" style="--i:1" data-collapsible>
+            <button class="collapsible-head" type="button" aria-expanded="true" aria-controls="addBody">
+              Add a user
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="collapsible-body" id="addBody">
+              <div class="collapsible-inner">
+                <form method="POST" action="/users" class="pad">
+                  <div class="form-row">
+                    <div class="field"><label for="u_name">Name</label><input id="u_name" type="text" name="name" required></div>
+                    <div class="field"><label for="u_email">Email</label><input id="u_email" type="email" name="email" required></div>
+                  </div>
+                  <div class="form-row">
+                    <div class="field"><label for="u_password">Password</label><input id="u_password" type="password" name="password" autocomplete="new-password" required></div>
+                    <div class="field">
+                      <label for="u_role">Role</label>
+                      <select id="u_role" name="role"><option value="developer">developer</option><option value="administrator">administrator</option></select>
+                    </div>
+                  </div>
+                  <div><button class="btn btn-sm" type="submit">Add user</button></div>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section class="card card-flush enter" style="--i:2" aria-label="All users">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Person</th><th>Role</th><th>Access</th></tr></thead>
+                <tbody>
+                  <% users.forEach(u => { %>
+                  <tr>
+                    <td>
+                      <div class="person">
+                        <span class="avatar" aria-hidden="true"><%= u.name.trim().charAt(0).toUpperCase() %></span>
+                        <div><strong><%= u.name %></strong><span><%= u.email %></span></div>
+                      </div>
+                    </td>
+                    <td>
+                      <form method="POST" action="/users/<%= u.user_id %>/role">
+                        <select class="role-select" name="role" aria-label="Role for <%= u.name %>" onchange="this.form.submit()">
+                          <option value="developer" <%= u.role === 'developer' ? 'selected' : '' %>>developer</option>
+                          <option value="administrator" <%= u.role === 'administrator' ? 'selected' : '' %>>administrator</option>
+                        </select>
+                      </form>
+                    </td>
+                    <td>
+                      <% if (u.user_id !== user.user_id) { %>
+                      <form method="POST" action="/users/<%= u.user_id %>/delete"
+                            data-confirm-title="Remove <%= u.name %>?" data-confirm="<%= u.name %> will lose access immediately. Bugs they reported stay in the tracker." data-confirm-label="Remove user">
+                        <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+                      </form>
+                      <% } else { %>
+                      <span class="badge neutral">You</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
-        <button class="btn small" style="margin-top:0;" type="submit">ADD USER</button>
-      </form>
-    </div>
-
-    <div class="card">
-      <table>
-        <tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr>
-        <% users.forEach(u => { %>
-          <tr>
-            <td><%= u.name %></td>
-            <td><%= u.email %></td>
-            <td>
-              <form method="POST" action="/users/<%= u.user_id %>/role" style="display:inline-flex; gap:6px;">
-                <select name="role" onchange="this.form.submit()">
-                  <option value="developer" <%= u.role === 'developer' ? 'selected' : '' %>>developer</option>
-                  <option value="administrator" <%= u.role === 'administrator' ? 'selected' : '' %>>administrator</option>
-                </select>
-              </form>
-            </td>
-            <td>
-              <% if (u.user_id !== user.user_id) { %>
-              <form method="POST" action="/users/<%= u.user_id %>/delete" style="display:inline;">
-                <button class="btn small danger" type="submit">Remove</button>
-              </form>
-              <% } else { %>
-                <span style="color:#888; font-size:12px;">(you)</span>
-              <% } %>
-            </td>
-          </tr>
-        <% }) %>
-      </table>
-    </div>
-  </div>
-</body>
-</html>
+<%- include('partials/shell-end') %>

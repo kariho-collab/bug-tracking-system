@@ -10,8 +10,11 @@
 ```
 npm install
 node db/seed.js      # creates and seeds db/bugtracker.db
-node server.js        # starts the app on http://localhost:3000
+node server.js        # starts the app on     
 ```
+npm install
+node db/seed.js      # creates and seeds db/bugtracker.db
+node server.js        # starts the app on http://localhost:3000
 Seeded login: alex@axiomlabs.dev / Passw0rd! (administrator)
 
 ## Pages (frontend)

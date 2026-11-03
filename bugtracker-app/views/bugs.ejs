@@ -1,54 +1,57 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Bug Tracker</title>
-  <link rel="stylesheet" href="/style.css" />
-</head>
-<body>
-  <%- include('partials/navbar', { user, active: 'bugs' }) %>
-  <div class="container">
-    <h1>Bug Tracker</h1>
-    <form method="GET" action="/bugs" class="filters">
-      <select name="status" onchange="this.form.submit()">
-        <option value="">Status: All</option>
-        <% ['Open','In Progress','Resolved','Closed','Reopened'].forEach(s => { %>
-          <option value="<%= s %>" <%= query.status === s ? 'selected' : '' %>><%= s %></option>
-        <% }) %>
-      </select>
-      <select name="priority" onchange="this.form.submit()">
-        <option value="">Priority: All</option>
-        <% ['Low','Medium','High','Critical'].forEach(p => { %>
-          <option value="<%= p %>" <%= query.priority === p ? 'selected' : '' %>><%= p %></option>
-        <% }) %>
-      </select>
-      <select name="category" onchange="this.form.submit()">
-        <option value="">Category: All</option>
-        <% categories.forEach(c => { %>
-          <option value="<%= c.name %>" <%= query.category === c.name ? 'selected' : '' %>><%= c.name %></option>
-        <% }) %>
-      </select>
-    </form>
+<%- include('partials/shell-start', { user: user, active: 'bugs', title: 'Bug tracker — BugTracker' }) %>
+<% const filtered = !!(query.status || query.priority || query.category); %>
+        <header class="page-head" style="--i:0">
+          <div>
+            <h1>Bug tracker</h1>
+            <p>Every reported bug, newest first. Filter by status, priority or category.</p>
+          </div>
+          <a class="btn" href="/report-bug">Report a bug</a>
+        </header>
 
-    <div class="card">
-      <table>
-        <tr><th>ID</th><th>Title</th><th>Category</th><th>Priority</th><th>Status</th><th>Assigned</th><th>Date</th></tr>
-        <% bugs.forEach(b => { %>
-          <tr>
-            <td><a class="rowlink" href="/bugs/<%= b.bug_id %>">#<%= b.bug_id %></a></td>
-            <td><%= b.title %></td>
-            <td><%= b.category %></td>
-            <td><span class="badge <%= b.priority %>"><%= b.priority %></span></td>
-            <td><span class="badge <%= b.status.replace(' ', '-') %>"><%= b.status %></span></td>
-            <td><%= b.assigned_to || '—' %></td>
-            <td><%= b.date_reported.slice(0, 10) %></td>
-          </tr>
-        <% }) %>
-        <% if (bugs.length === 0) { %>
-          <tr><td colspan="7" style="text-align:center; color:#888; padding:24px;">No bugs match these filters.</td></tr>
-        <% } %>
-      </table>
-    </div>
-  </div>
-</body>
-</html>
+        <form method="GET" action="/bugs" class="filters enter" style="--i:1" aria-label="Filter bugs">
+          <select name="status" aria-label="Filter by status" onchange="this.form.submit()">
+            <option value="">All statuses</option>
+            <% ['Open','In Progress','Resolved','Closed','Reopened'].forEach(s => { %>
+              <option value="<%= s %>" <%= query.status === s ? 'selected' : '' %>><%= s %></option>
+            <% }) %>
+          </select>
+          <select name="priority" aria-label="Filter by priority" onchange="this.form.submit()">
+            <option value="">All priorities</option>
+            <% ['Low','Medium','High','Critical'].forEach(p => { %>
+              <option value="<%= p %>" <%= query.priority === p ? 'selected' : '' %>><%= p %></option>
+            <% }) %>
+          </select>
+          <select name="category" aria-label="Filter by category" onchange="this.form.submit()">
+            <option value="">All categories</option>
+            <% categories.forEach(c => { %>
+              <option value="<%= c.name %>" <%= query.category === c.name ? 'selected' : '' %>><%= c.name %></option>
+            <% }) %>
+          </select>
+          <% if (filtered) { %><a class="clear-link" href="/bugs">Clear filters</a><% } %>
+          <span class="count"><%= bugs.length %> <%= bugs.length === 1 ? 'bug' : 'bugs' %></span>
+        </form>
+
+        <section class="card card-flush enter" style="--i:2" aria-label="Bug list">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Title</th><th class="hide-sm">Category</th><th>Priority</th><th>Status</th><th class="hide-sm">Assigned to</th><th class="hide-sm">Reported</th></tr></thead>
+              <tbody>
+                <% bugs.forEach(b => { %>
+                <tr data-href="/bugs/<%= b.bug_id %>">
+                  <td><a class="row-link" href="/bugs/<%= b.bug_id %>">#<%= b.bug_id %></a></td>
+                  <td class="cell-title"><%= b.title %></td>
+                  <td class="cell-muted hide-sm"><%= b.category %></td>
+                  <td><span class="badge <%= b.priority %>"><%= b.priority %></span></td>
+                  <td><span class="badge <%= b.status.replace(' ', '-') %>"><%= b.status %></span></td>
+                  <td class="cell-muted hide-sm"><%= b.assigned_to || 'Unassigned' %></td>
+                  <td class="cell-muted hide-sm"><%= b.date_reported.slice(0, 10) %></td>
+                </tr>
+                <% }) %>
+                <% if (bugs.length === 0) { %>
+                <tr><td colspan="7"><div class="empty"><strong>No bugs match these filters</strong>Clear a filter or report a new bug.</div></td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+<%- include('partials/shell-end') %>

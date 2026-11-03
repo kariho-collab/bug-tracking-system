@@ -1,26 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Register — Bug Tracker</title>
-  <link rel="stylesheet" href="/style.css" />
-</head>
-<body>
-  <div class="login-wrap">
-    <div class="login-card">
-      <h1>Create Account</h1>
-      <% if (error) { %><div class="error-box"><%= error %></div><% } %>
-      <form method="POST" action="/register">
-        <label>Full name</label>
-        <input type="text" name="name" required />
-        <label>Email address</label>
-        <input type="email" name="email" required />
-        <label>Password</label>
-        <input type="password" name="password" required />
-        <button class="btn" style="width:100%;" type="submit">REGISTER</button>
+<%- include('partials/head', { title: 'Create account — BugTracker', bodyClass: 'auth' }) %>
+  <main class="auth-wrap" id="main">
+    <section class="card glow-border auth-card" aria-labelledby="authTitle">
+      <div class="brand">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8a4 4 0 018 0v1H8V8z"/><path d="M6.5 11h11v3.5a5.5 5.5 0 01-11 0V11z"/><path d="M3 12h3.5M17.5 12H21M4 19l2.6-1.6M20 19l-2.6-1.6M4 5l3 2M20 5l-3 2M12 11v8"/></svg></span>
+        <span>BugTracker</span>
+      </div>
+      <h1 id="authTitle">Create your account</h1>
+      <p class="lede">You will start as a developer and can report and track bugs right away.</p>
+      <% if (error) { %><div class="alert alert-error" role="alert"><%= error %></div><% } %>
+      <form method="POST" action="/register" class="stack">
+        <div class="field"><label for="name">Full name</label><input id="name" type="text" name="name" autocomplete="name" required></div>
+        <div class="field"><label for="email">Email address</label><input id="email" type="email" name="email" autocomplete="username" required></div>
+        <div class="field"><label for="password">Password</label><input id="password" type="password" name="password" autocomplete="new-password" required></div>
+        <button class="btn btn-block" type="submit">Create account</button>
       </form>
-      <a class="muted-link" href="/login">Already have an account? Log in</a>
-    </div>
-  </div>
-</body>
-</html>
+      <p class="auth-foot">Already registered? <a href="/login">Sign in</a></p>
+    </section>
+  </main>
+<%- include('partials/foot') %>

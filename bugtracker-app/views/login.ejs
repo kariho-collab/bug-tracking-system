@@ -1,24 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Login — Bug Tracker</title>
-  <link rel="stylesheet" href="/style.css" />
-</head>
-<body>
-  <div class="login-wrap">
-    <div class="login-card">
-      <h1>Bug Tracker Login</h1>
-      <% if (error) { %><div class="error-box"><%= error %></div><% } %>
-      <form method="POST" action="/login">
-        <label>Email address</label>
-        <input type="email" name="email" required />
-        <label>Password</label>
-        <input type="password" name="password" required />
-        <button class="btn" style="width:100%;" type="submit">LOG IN</button>
+<%- include('partials/head', { title: 'Sign in — BugTracker', bodyClass: 'auth' }) %>
+  <main class="auth-wrap" id="main">
+    <section class="card glow-border auth-card" aria-labelledby="authTitle">
+      <div class="brand">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8a4 4 0 018 0v1H8V8z"/><path d="M6.5 11h11v3.5a5.5 5.5 0 01-11 0V11z"/><path d="M3 12h3.5M17.5 12H21M4 19l2.6-1.6M20 19l-2.6-1.6M4 5l3 2M20 5l-3 2M12 11v8"/></svg></span>
+        <span>BugTracker</span>
+      </div>
+      <h1 id="authTitle">Sign in</h1>
+      <p class="lede">Log, triage and close bugs in one place.</p>
+      <% if (error) { %><div class="alert alert-error" role="alert"><%= error %></div><% } %>
+      <form method="POST" action="/login" class="stack">
+        <div class="field"><label for="email">Email address</label><input id="email" type="email" name="email" autocomplete="username" required></div>
+        <div class="field"><label for="password">Password</label><input id="password" type="password" name="password" autocomplete="current-password" required></div>
+        <button class="btn btn-block" type="submit">Sign in</button>
       </form>
-      <a class="muted-link" href="/register">Don't have an account? Register</a>
-    </div>
-  </div>
-</body>
-</html>
+      <p class="auth-foot">New here? <a href="/register">Create an account</a></p>
+    </section>
+  </main>
+<%- include('partials/foot') %>

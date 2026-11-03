@@ -27,7 +27,7 @@ router.post("/login", (req, res) => {
   }
   req.session.userId = u.user_id;
   req.session.role = u.role;
-  res.redirect("/dashboard");
+  res.redirect("/dashboard?toast=welcome");
 });
 
 router.get("/register", (req, res) => {
@@ -44,7 +44,7 @@ router.post("/register", (req, res) => {
     .run(name, email, bcrypt.hashSync(password, 10));
   req.session.userId = result.lastInsertRowid;
   req.session.role = "developer";
-  res.redirect("/dashboard");
+  res.redirect("/dashboard?toast=welcome");
 });
 
 router.get("/logout", (req, res) => req.session.destroy(() => res.redirect("/login")));
@@ -68,7 +68,8 @@ router.get("/dashboard", requirePageAuth, (req, res) => {
        ORDER BY b.date_reported DESC LIMIT 5`
     )
     .all();
-  res.render("dashboard", { user, counts, recentBugs });
+  const total = db.prepare("SELECT COUNT(*) n FROM bugs").get().n;
+  res.render("dashboard", { user, counts, recentBugs, total });
 });
 
 // ---------- Report a bug ----------
@@ -103,7 +104,7 @@ router.post("/report-bug", requirePageAuth, (req, res) => {
     )
     .run(title.trim(), description, priority, category_id, openStatus.status_id, user.user_id);
 
-  res.redirect(`/bugs/${result.lastInsertRowid}`);
+  res.redirect(`/bugs/${result.lastInsertRowid}?toast=created`);
 });
 
 // ---------- Bug tracker list ----------
@@ -176,7 +177,7 @@ router.post("/bugs/:id/status", requirePageAuth, (req, res) => {
   db.prepare("INSERT INTO comments (bug_id, user_id, comment_text) VALUES (?, ?, ?)").run(
     bug.bug_id, user.user_id, `Status changed from ${oldStatus.name} to ${newStatus.name}`
   );
-  res.redirect(`/bugs/${bug.bug_id}`);
+  res.redirect(`/bugs/${bug.bug_id}?toast=status`);
 });
 
 router.post("/bugs/:id/assign", requirePageAuth, (req, res) => {
@@ -190,7 +191,7 @@ router.post("/bugs/:id/assign", requirePageAuth, (req, res) => {
       bug.bug_id, user.user_id, `Assigned to ${assignee.name}`
     );
   }
-  res.redirect(`/bugs/${bug.bug_id}`);
+  res.redirect(`/bugs/${bug.bug_id}?toast=assigned`);
 });
 
 router.post("/bugs/:id/comment", requirePageAuth, (req, res) => {
@@ -199,7 +200,7 @@ router.post("/bugs/:id/comment", requirePageAuth, (req, res) => {
   db.prepare("INSERT INTO comments (bug_id, user_id, comment_text) VALUES (?, ?, ?)").run(
     req.params.id, user.user_id, comment_text
   );
-  res.redirect(`/bugs/${req.params.id}`);
+  res.redirect(`/bugs/${req.params.id}?toast=commented`);
 });
 
 // ---------- Reports ----------
@@ -242,19 +243,19 @@ router.post("/users", requirePageAdmin, (req, res) => {
       name, email, bcrypt.hashSync(password, 10), role || "developer"
     );
   }
-  res.redirect("/users");
+  res.redirect(existing ? "/users?toast=user_exists" : "/users?toast=user_added");
 });
 
 router.post("/users/:id/role", requirePageAdmin, (req, res) => {
   db.prepare("UPDATE users SET role=? WHERE user_id=?").run(req.body.role, req.params.id);
-  res.redirect("/users");
+  res.redirect("/users?toast=role_updated");
 });
 
 router.post("/users/:id/delete", requirePageAdmin, (req, res) => {
   if (Number(req.params.id) !== req.session.userId) {
     db.prepare("DELETE FROM users WHERE user_id=?").run(req.params.id);
   }
-  res.redirect("/users");
+  res.redirect("/users?toast=user_removed");
 });
 
 module.exports = router;

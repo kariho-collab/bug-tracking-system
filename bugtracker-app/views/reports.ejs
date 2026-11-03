@@ -1,46 +1,82 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Reports — Bug Tracker</title>
-  <link rel="stylesheet" href="/style.css" />
-</head>
-<body>
-  <%- include('partials/navbar', { user, active: 'reports' }) %>
-  <div class="container">
-    <h1>Bug Reports &amp; Analytics</h1>
-
-    <div class="card">
-      <h2>Bugs by Category</h2>
-      <div class="chart-bars">
-        <% const maxCount = Math.max(...byCategory.map(c => c.count), 1); %>
-        <% byCategory.forEach(c => { %>
-          <div class="bar-wrap">
-            <div class="bar" style="height:<%= Math.round((c.count / maxCount) * 130) %>px; width: 44px;"></div>
-            <div class="bar-label"><%= c.category %> (<%= c.count %>)</div>
+<%- include('partials/shell-start', { user: user, active: 'reports', title: 'Reports — BugTracker' }) %>
+<%
+  const order = ['Open', 'In Progress', 'Resolved', 'Closed', 'Reopened'];
+  const rgb = { 'Open': '34,211,238', 'In Progress': '167,139,250', 'Resolved': '52,211,153', 'Closed': '100,116,139', 'Reopened': '244,114,182' };
+  const statuses = order.map(n => byStatus.find(s => s.status === n)).filter(Boolean);
+  const pct = (n) => totalBugs ? Math.round((n / totalBugs) * 1000) / 10 : 0;
+  const maxCount = Math.max(1, ...byCategory.map(c => c.count));
+  const plural = (n) => n + (n === 1 ? ' bug' : ' bugs');
+%>
+        <header class="page-head" style="--i:0">
+          <div>
+            <h1>Reports</h1>
+            <p>How bugs are distributed and how quickly they get resolved, calculated from your live data.</p>
           </div>
-        <% }) %>
-      </div>
-    </div>
+        </header>
 
-    <div class="card">
-      <h2>Status Breakdown</h2>
-      <table>
-        <tr><th>Status</th><th>Count</th></tr>
-        <% byStatus.forEach(s => { %>
-          <tr><td><span class="badge <%= s.status.replace(' ','-') %>"><%= s.status %></span></td><td><%= s.count %></td></tr>
-        <% }) %>
-      </table>
-    </div>
+        <section class="stats stats-3 enter" style="--i:1" data-inview aria-label="Summary figures">
+          <div class="card stat c-neutral">
+            <div class="stat-top"><span>Total bugs logged</span><span class="stat-dot" aria-hidden="true"></span></div>
+            <div class="stat-value" data-count="<%= totalBugs %>"><%= totalBugs %></div>
+            <p class="stat-note">Across all categories and statuses</p>
+          </div>
+          <div class="card stat c-resolved">
+            <div class="stat-top"><span>Average time to resolve</span><span class="stat-dot" aria-hidden="true"></span></div>
+            <% if (avgResolutionDays !== null) { %>
+            <div class="stat-value"><span data-count="<%= avgResolutionDays %>" data-decimals="1"><%= avgResolutionDays %></span><small>days</small></div>
+            <p class="stat-note">From report to resolution</p>
+            <% } else { %>
+            <div class="stat-value">n/a</div>
+            <p class="stat-note">No bug has been resolved yet</p>
+            <% } %>
+          </div>
+          <div class="card stat c-critical">
+            <div class="stat-top"><span>Reopened rate</span><span class="stat-dot" aria-hidden="true"></span></div>
+            <div class="stat-value"><span data-count="<%= reopenedRate %>" data-decimals="1"><%= reopenedRate %></span><small>%</small></div>
+            <p class="stat-note">Bugs that came back after being closed</p>
+          </div>
+        </section>
 
-    <div class="card">
-      <h2>Summary</h2>
-      <p style="font-size:13px; color:#444;">
-        Total bugs logged: <strong><%= totalBugs %></strong>
-        &nbsp;·&nbsp; Average time to resolve: <strong><%= avgResolutionDays !== null ? avgResolutionDays + ' days' : 'n/a' %></strong>
-        &nbsp;·&nbsp; Reopened rate: <strong><%= reopenedRate %>%</strong>
-      </p>
-    </div>
-  </div>
-</body>
-</html>
+        <div class="reports-grid enter" style="--i:2">
+          <section class="card" aria-labelledby="catTitle" data-inview>
+            <h2 class="card-title" id="catTitle">Bugs by category</h2>
+            <p class="card-sub">Hover or focus a bar for the exact count.</p>
+            <% if (byCategory.length === 0) { %>
+              <div class="empty"><strong>Nothing to chart yet</strong>Report a bug to see categories here.</div>
+            <% } else { %>
+            <div class="chart" role="group" aria-label="Bugs by category">
+              <% byCategory.forEach((c, i) => { %>
+              <div class="bar-col" tabindex="0" role="img" style="--h: <%= Math.round((c.count / maxCount) * 100) %>%; --d: <%= i %>"
+                   aria-label="<%= c.category %>: <%= plural(c.count) %>, <%= pct(c.count) %> percent"
+                   data-tip-title="<%= c.category %>" data-tip="<%= plural(c.count) %> (<%= pct(c.count) %>% of all)">
+                <span class="bar-val"><%= c.count %></span>
+                <div class="bar"></div>
+              </div>
+              <% }) %>
+            </div>
+            <div class="axis" aria-hidden="true"><% byCategory.forEach(c => { %><span><%= c.category %></span><% }) %></div>
+            <% } %>
+          </section>
+
+          <section class="card" aria-labelledby="statTitle" data-inview>
+            <h2 class="card-title" id="statTitle">Status breakdown</h2>
+            <p class="card-sub">Share of all bugs in each status.</p>
+            <% if (statuses.length === 0) { %>
+              <div class="empty"><strong>Nothing to chart yet</strong>Report a bug to see statuses here.</div>
+            <% } else { %>
+            <div class="stack-bar" role="group" aria-label="Bugs by status">
+              <% statuses.forEach((s, i) => { %>
+              <span class="stack-seg" tabindex="0" role="img" style="--n: <%= s.count %>; --c: <%= rgb[s.status] %>; --d: <%= i %>"
+                    aria-label="<%= s.status %>: <%= plural(s.count) %>, <%= pct(s.count) %> percent"
+                    data-tip-title="<%= s.status %>" data-tip="<%= plural(s.count) %> (<%= pct(s.count) %>% of all)"></span>
+              <% }) %>
+            </div>
+            <ul class="legend">
+              <% statuses.forEach(s => { %>
+              <li><span class="badge <%= s.status.replace(' ', '-') %>"><%= s.status %></span><span class="num"><%= s.count %></span><span class="pct"><%= pct(s.count) %>%</span></li>
+              <% }) %>
+            </ul>
+            <% } %>
+          </section>
+        </div>
+<%- include('partials/shell-end') %>
