@@ -1,7 +1,7 @@
 <%- include('partials/shell-start', { user: user, active: 'reports', title: 'Reports — BugTracker' }) %>
 <%
   const order = ['Open', 'In Progress', 'Resolved', 'Closed', 'Reopened'];
-  const rgb = { 'Open': '34,211,238', 'In Progress': '167,139,250', 'Resolved': '52,211,153', 'Closed': '100,116,139', 'Reopened': '244,114,182' };
+  const rgb = { 'Open': '8,145,178', 'In Progress': '124,58,237', 'Resolved': '5,150,105', 'Closed': '100,116,139', 'Reopened': '219,39,119' };
   const statuses = order.map(n => byStatus.find(s => s.status === n)).filter(Boolean);
   const pct = (n) => totalBugs ? Math.round((n / totalBugs) * 1000) / 10 : 0;
   const maxCount = Math.max(1, ...byCategory.map(c => c.count));
